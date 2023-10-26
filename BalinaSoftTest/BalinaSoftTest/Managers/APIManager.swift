@@ -7,8 +7,17 @@ final class APIManager {
     static let shared = APIManager()
     private init() {}
     
-    func fetchData(completion: @escaping (GetModel?) -> ()) {
-        guard let url = URL(string: Resources.getURL) else { return }
+    private func makeURLComponents(parameters: [String: String]) -> URLComponents {
+        guard var components = URLComponents(string: Resources.getURL) else { return URLComponents() }
+        components.queryItems = parameters.map { (key, value) in
+            URLQueryItem(name: key, value: value)
+        }
+        return components
+    }
+    
+    func fetchData(parameters: [String: String], completion: @escaping (GetModel?) -> ()) {
+        
+        guard let url = makeURLComponents(parameters: parameters).url else { return }
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         let task = URLSession.shared.dataTask(with: request) { data, response, error in

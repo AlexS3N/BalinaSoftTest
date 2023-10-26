@@ -3,8 +3,10 @@ import Foundation
 final class ViewModel {
     
     //MARK: - var/let
-    var fetchedData: GetModel?
+    var fetchedData: [Content] = []
     var tappedCellId: Int?
+    var page = 0
+    var isPagination: Bool = false
     
     var namePhoto: String? {
         didSet {
@@ -20,14 +22,20 @@ final class ViewModel {
     
     //MARK: - GetRequest
     func getData(completion: @escaping () -> ()) {
-        APIManager.shared.fetchData { data in
-            self.fetchedData = data
+        isPagination = true
+        APIManager.shared.fetchData(parameters: [Resources.page: String(page)]) { data in
+            guard let data = data else { return }
+            self.fetchedData.append(contentsOf: data.content)
             completion()
+            if self.page < data.totalPages {
+                self.page += 1
+                self.isPagination = false
+            }
         }
     }
     
     //MARK: - Flow functions
     func sendID(_ indexPath: IndexPath) {
-        tappedCellId = fetchedData?.content[indexPath.row].id
+        tappedCellId = fetchedData[indexPath.row].id
     }
 }

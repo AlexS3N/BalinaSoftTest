@@ -2,6 +2,8 @@ import Foundation
 
 struct GetModel: Decodable {
     let content: [Content]
+    let page: Int
+    let totalPages: Int
 }
 
 struct Content: Decodable {

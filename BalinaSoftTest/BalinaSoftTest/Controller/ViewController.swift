@@ -51,14 +51,13 @@ final class ViewController: UIViewController, UINavigationControllerDelegate {
 //MARK: - TableViewDataSource
 extension ViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        viewModel.fetchedData?.content.count ?? 5
+        viewModel.fetchedData.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: TableViewCell.reuseID, for: indexPath) as? TableViewCell else { return UITableViewCell() }
-        if let pictures = viewModel.fetchedData?.content[indexPath.row] {
-            cell.configure(with: pictures)
-        }
+        let pictures = viewModel.fetchedData[indexPath.row]
+        cell.configure(with: pictures)
         cell.separatorInset = .zero
         return cell
     }
@@ -86,5 +85,19 @@ extension ViewController: UIImagePickerControllerDelegate {
             viewModel.namePhoto = name
         }
         self.dismiss(animated: true, completion: nil)
+    }
+}
+
+//MARK: - UIScrollViewDelegate
+extension ViewController: UIScrollViewDelegate {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let position = scrollView.contentOffset.y
+        if position > (tableView.contentSize.height - 100 - scrollView.frame.size.height)  && !viewModel.isPagination {
+            viewModel.getData {
+                DispatchQueue.main.async {
+                    self.tableView.reloadData()
+                }
+            }
+        }
     }
 }
